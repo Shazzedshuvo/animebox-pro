@@ -10,19 +10,19 @@ export const getMovieBoxStreamUrls = (malId, epNum, animeTitle = '', season = 1)
   const tmdbId = getTmdbIdForAnime(animeTitle, malId);
 
   return {
-    // Server 1: VidSrc CC (1080p Ultra HD MovieBox Server)
-    vidcloud: `https://vidsrc.cc/v2/embed/tv/${tmdbId}/${s}/${ep}`,
+    // Server 1: Embed.su (Clean, instant autoplay, zero delay)
+    vidcloud: `https://embed.su/embed/tv/${tmdbId}/${s}/${ep}`,
     
-    // Server 2: SmashyStream Multi-Audio (Fast Sub & Dub)
-    gogostream: `https://player.smashystream.xyz/tv/${tmdbId}?s=${s}&e=${ep}`,
+    // Server 2: VidSrc CC (1080p Ultra HD MovieBox Core)
+    gogostream: `https://vidsrc.cc/v2/embed/tv/${tmdbId}/${s}/${ep}`,
     
-    // Server 3: VidSrc Me (High Speed Buffer-Free)
-    vidsrc: `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&season=${s}&episode=${ep}`,
+    // Server 3: SmashyStream Multi-Audio (Fast Sub & Dub)
+    vidsrc: `https://player.smashystream.xyz/tv/${tmdbId}?s=${s}&e=${ep}`,
     
-    // Server 4: AutoEmbed Cloud
-    autoembed: `https://autoembed.to/tv/tmdb/${tmdbId}-${s}-${ep}`,
+    // Server 4: VidSrc XYZ Pro
+    autoembed: `https://vidsrc.xyz/embed/tv?tmdb=${tmdbId}&season=${s}&episode=${ep}`,
     
-    // Server 5: MultiEmbed Direct
+    // Server 5: MultiEmbed Direct Stream
     multidub: `https://multiembed.mov/directstream.php?video_id=${tmdbId}&tmdb=1&s=${s}&e=${ep}`
   };
 };

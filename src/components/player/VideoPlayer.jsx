@@ -22,7 +22,6 @@ export const VideoPlayer = ({
 }) => {
   const { lang, t } = useLanguage();
   const [isIframeLoading, setIsIframeLoading] = useState(true);
-  const [iframeError, setIframeError] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
 
@@ -54,17 +53,15 @@ export const VideoPlayer = ({
   // Handle server reload
   const handleReloadServer = () => {
     setIsIframeLoading(true);
-    setIframeError(false);
     setReloadKey(prev => prev + 1);
   };
 
   // Reset loading state when episode or server changes
   useEffect(() => {
     setIsIframeLoading(true);
-    setIframeError(false);
     const timer = setTimeout(() => {
       setIsIframeLoading(false);
-    }, 1000);
+    }, 800);
     return () => clearTimeout(timer);
   }, [streamEmbedUrl, epNum, activeServer]);
 
@@ -90,59 +87,102 @@ export const VideoPlayer = ({
   }, []);
 
   return (
-    <div 
-      id="anime-player-wrapper"
-      className={`video-player-container ${isFullscreen ? 'fullscreen' : ''} ${isTheaterMode ? 'theater-active' : ''}`}
-    >
-      {/* Ambient Cinema Backdrop Glow */}
+    <div className="player-outer-wrapper">
       <div 
-        className="player-ambient-glow"
-        style={{
-          backgroundImage: `url(${anime?.bannerImage || anime?.posterImage})`
-        }}
-      />
-
-      {/* Loading Overlay */}
-      {(isServerLoading || isIframeLoading) && (
-        <div className="player-loading-overlay">
-          <div className="player-loader-box">
-            <Loader2 size={42} className="animate-spin text-crimson" />
-            <div className="player-loader-text-group">
-              <span className="player-loading-text">
-                {lang === 'bn' 
-                  ? `এপিসোড ${epNum} লোড হচ্ছে...` 
-                  : `Loading Episode ${epNum} Stream...`}
-              </span>
-              <span className="player-server-subtext">
-                {lang === 'bn' ? currentServerObj.banglaName : currentServerObj.name} ({currentServerObj.quality})
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Main Dynamic Real Episode Video Embed */}
-      <div className="official-video-wrapper">
-        <iframe
-          key={`${activeServer}_${animeId}_${epNum}_${reloadKey}`}
-          src={streamEmbedUrl}
-          title={`${animeTitle} - Episode ${epNum}`}
-          className="video-element-iframe"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-          allowFullScreen
-          onLoad={() => setIsIframeLoading(false)}
-          onError={() => {
-            setIsIframeLoading(false);
-            setIframeError(true);
+        id="anime-player-wrapper"
+        className={`video-player-container ${isFullscreen ? 'fullscreen' : ''} ${isTheaterMode ? 'theater-active' : ''}`}
+      >
+        {/* Ambient Cinema Backdrop Glow */}
+        <div 
+          className="player-ambient-glow"
+          style={{
+            backgroundImage: `url(${anime?.bannerImage || anime?.posterImage})`
           }}
         />
+
+        {/* Loading Overlay */}
+        {(isServerLoading || isIframeLoading) && (
+          <div className="player-loading-overlay">
+            <div className="player-loader-box">
+              <Loader2 size={42} className="animate-spin text-crimson" />
+              <div className="player-loader-text-group">
+                <span className="player-loading-text">
+                  {lang === 'bn' 
+                    ? `এপিসোড ${epNum} স্ট্রিম লোড হচ্ছে...` 
+                    : `Loading Episode ${epNum} Stream...`}
+                </span>
+                <span className="player-server-subtext">
+                  {lang === 'bn' ? currentServerObj.banglaName : currentServerObj.name}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Main Dynamic Real Episode Video Embed */}
+        <div className="official-video-wrapper">
+          <iframe
+            key={`${activeServer}_${animeId}_${epNum}_${reloadKey}`}
+            src={streamEmbedUrl}
+            title={`${animeTitle} - Episode ${epNum}`}
+            className="video-element-iframe"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+            allowFullScreen
+            onLoad={() => setIsIframeLoading(false)}
+          />
+        </div>
+
+        {/* Floating Cinema Controls Bar on Top Right */}
+        <div className="player-top-floating-bar">
+          <div className="player-top-meta-badge">
+            <span className="ep-live-pill">EP {epNum}</span>
+            <span className="server-live-pill">{currentServerObj.badge}</span>
+            <span className="ep-live-title">{currentEpData.title}</span>
+          </div>
+
+          <div className="player-top-actions-group">
+            {/* Reload Server */}
+            <button 
+              className="ctrl-btn-top"
+              onClick={handleReloadServer}
+              title={lang === 'bn' ? 'সার্ভার রিফ্রেশ করুন' : 'Reload Stream'}
+            >
+              <RotateCcw size={15} />
+            </button>
+
+            {/* Theater Mode Button */}
+            {onToggleTheater && (
+              <button 
+                className={`ctrl-btn-top ${isTheaterMode ? 'active text-gold' : ''}`}
+                onClick={onToggleTheater}
+                title={isTheaterMode 
+                  ? (lang === 'bn' ? 'থিয়েটার মোড বন্ধ করুন' : 'Exit Theater Mode (T)')
+                  : (lang === 'bn' ? 'থিয়েটার মোড চালু করুন' : 'Theater Mode (T)')}
+              >
+                {isTheaterMode ? <Sun size={15} /> : <Moon size={15} />}
+              </button>
+            )}
+
+            {/* Fullscreen Button */}
+            <button 
+              className="ctrl-btn-top"
+              onClick={toggleFullscreen}
+              title={isFullscreen 
+                ? (lang === 'bn' ? 'ফুলস্ক্রিন বন্ধ (F)' : 'Exit Fullscreen (F)') 
+                : (lang === 'bn' ? 'ফুলস্ক্রিন (F)' : 'Fullscreen (F)')}
+            >
+              {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
+            </button>
+          </div>
+        </div>
+
       </div>
 
-      {/* Quick Direct Stream Switcher Bar at the bottom of player */}
-      <div className="player-direct-links-bar">
+      {/* Direct Streaming Hub Bar Below Player */}
+      <div className="player-direct-links-strip glass-panel">
         <div className="direct-links-title">
           <Zap size={14} className="text-gold" />
-          <span>{lang === 'bn' ? 'সরাসরি স্ট্রিমিং লিঙ্ক:' : 'Direct Streaming Hub:'}</span>
+          <span>{lang === 'bn' ? 'সরাসরি স্ট্রিমিং ও ডাবড হাব:' : 'Direct Streaming & Dub Hub:'}</span>
         </div>
         <div className="direct-links-group">
           {directWatchLinks.map((link, idx) => (
@@ -160,51 +200,6 @@ export const VideoPlayer = ({
           ))}
         </div>
       </div>
-
-      {/* Floating Cinema Controls Bar on Top Right */}
-      <div className="player-top-floating-bar">
-        <div className="player-top-meta-badge">
-          <span className="ep-live-pill">EP {epNum}</span>
-          <span className="server-live-pill">{currentServerObj.badge}</span>
-          <span className="ep-live-title">{currentEpData.title}</span>
-        </div>
-
-        <div className="player-top-actions-group">
-          {/* Reload Server */}
-          <button 
-            className="ctrl-btn-top"
-            onClick={handleReloadServer}
-            title={lang === 'bn' ? 'সার্ভার রিফ্রেশ করুন' : 'Reload Stream'}
-          >
-            <RotateCcw size={15} />
-          </button>
-
-          {/* Theater Mode Button */}
-          {onToggleTheater && (
-            <button 
-              className={`ctrl-btn-top ${isTheaterMode ? 'active text-gold' : ''}`}
-              onClick={onToggleTheater}
-              title={isTheaterMode 
-                ? (lang === 'bn' ? 'থিয়েটার মোড বন্ধ করুন' : 'Exit Theater Mode (T)')
-                : (lang === 'bn' ? 'থিয়েটার মোড চালু করুন' : 'Theater Mode (T)')}
-            >
-              {isTheaterMode ? <Sun size={15} /> : <Moon size={15} />}
-            </button>
-          )}
-
-          {/* Fullscreen Button */}
-          <button 
-            className="ctrl-btn-top"
-            onClick={toggleFullscreen}
-            title={isFullscreen 
-              ? (lang === 'bn' ? 'ফুলস্ক্রিন বন্ধ (F)' : 'Exit Fullscreen (F)') 
-              : (lang === 'bn' ? 'ফুলস্ক্রিন (F)' : 'Fullscreen (F)')}
-          >
-            {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
-          </button>
-        </div>
-      </div>
-
     </div>
   );
 };

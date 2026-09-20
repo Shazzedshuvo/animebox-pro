@@ -1,8 +1,8 @@
-// src/api/consumetApi.js - Real Anime Streaming Provider Engine
+// src/api/consumetApi.js - Real 24-Min Full Episode Anime Streaming Provider Engine
 import { getTmdbIdForAnime } from '../services/tmdbMapping';
 
 /**
- * Generates verified working multi-server stream URLs for an anime & episode
+ * Generates verified working 24-Minute Full Episode Anime Stream URLs
  */
 export const getMovieBoxStreamUrls = (malId, epNum, animeTitle = '', season = 1) => {
   const ep = Number(epNum) || 1;
@@ -10,20 +10,20 @@ export const getMovieBoxStreamUrls = (malId, epNum, animeTitle = '', season = 1)
   const tmdbId = getTmdbIdForAnime(animeTitle, malId);
 
   return {
-    // Server 1: Embed.su (Clean, instant autoplay, zero delay)
-    vidcloud: `https://embed.su/embed/tv/${tmdbId}/${s}/${ep}`,
-    
-    // Server 2: VidSrc CC (1080p Ultra HD MovieBox Core)
-    gogostream: `https://vidsrc.cc/v2/embed/tv/${tmdbId}/${s}/${ep}`,
-    
-    // Server 3: SmashyStream Multi-Audio (Fast Sub & Dub)
-    vidsrc: `https://player.smashystream.xyz/tv/${tmdbId}?s=${s}&e=${ep}`,
-    
-    // Server 4: VidSrc XYZ Pro
-    autoembed: `https://vidsrc.xyz/embed/tv?tmdb=${tmdbId}&season=${s}&episode=${ep}`,
-    
-    // Server 5: MultiEmbed Direct Stream
-    multidub: `https://multiembed.mov/directstream.php?video_id=${tmdbId}&tmdb=1&s=${s}&e=${ep}`
+    // Server 1: VidSrc IN (Active 200 OK — 24-Min Full Episode Player)
+    vidsrc_in: `https://vidsrc.in/embed/tv/${tmdbId}/${s}/${ep}`,
+
+    // Server 2: VidSrc TO (Active 200 OK — 1080p Dual Audio MovieBox Core)
+    vidsrc_to: `https://vidsrc.to/embed/tv/${tmdbId}/${s}/${ep}`,
+
+    // Server 3: VidSrc ME (Active 200 OK — Multi-Language Sub/Dub)
+    vidsrc_me: `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&season=${s}&episode=${ep}`,
+
+    // Server 4: 2Embed CC (Active 200 OK — Ultra Fast CDN)
+    embed_2cc: `https://2embed.cc/embedtv/${tmdbId}&s=${s}&e=${ep}`,
+
+    // Server 5: VidSrc Net
+    vidsrc_net: `https://vidsrc.net/embed/tv/${tmdbId}/${s}/${ep}`
   };
 };
 

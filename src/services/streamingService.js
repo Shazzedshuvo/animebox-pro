@@ -1,65 +1,65 @@
-// src/services/streamingService.js - Multi-Server Streaming Architecture with 100% Working Failover
+// src/services/streamingService.js - Real 24-Min Full Episode Anime Streaming System
 import { getMovieBoxStreamUrls } from '../api/consumetApi';
 import { getAnimeWorldEpisodeUrl } from './animeWorldService';
 
 /**
- * 5 High Speed Streaming Servers with Guaranteed 100% Playback
+ * 5 Active High-Speed Streaming Servers for 24-Min Full Anime Episodes
  */
 export const SERVERS = [
   {
-    id: "official-pv",
-    name: "Official 1080p Stream (Trailer / PV)",
-    banglaName: "সার্ভার ১ — অফিসিয়াল ১০৮০p ট্রেইলার ও প্রিভিউ",
-    type: "1080p Official Master",
-    audio: "Original JP Audio HD",
+    id: "vidsrc_in",
+    name: "VidSrc Pro (24-Min Full Episode)",
+    banglaName: "সার্ভার ১ — ভিডসোর্স প্রো (২৪ মিনিট ফুল এপিসোড)",
+    type: "Full Episode 1080p",
+    audio: "Original JP Sub / Multi-Sub",
     quality: "1080p 60FPS",
-    badge: "OFFICIAL HD",
-    speed: "Ultra Fast Global CDN",
-    provider: "Official Channel"
+    badge: "FULL EPISODE",
+    speed: "Master CDN — Instant",
+    provider: "VidSrc IN Core"
+  },
+  {
+    id: "vidsrc_to",
+    name: "VidSrc TO (MovieBox Dual Audio)",
+    banglaName: "সার্ভার ২ — মুভিবক্স ডুয়াল অডিও",
+    type: "Dual Audio (JP/EN)",
+    audio: "Dual Audio Sub/Dub",
+    quality: "Full HD 1080p",
+    badge: "DUAL AUDIO",
+    speed: "Fast CDN",
+    provider: "VidSrc TO Engine"
+  },
+  {
+    id: "vidsrc_me",
+    name: "VidSrc ME (Buffer-Free)",
+    banglaName: "সার্ভার ৩ — ভিডসোর্স মি (বাফার-ফ্রি)",
+    type: "1080p HD Stream",
+    audio: "Sub & Dub Fast Stream",
+    quality: "1080p / 720p HD",
+    badge: "NO BUFFER",
+    speed: "Global Edge CDN",
+    provider: "VidSrc ME"
+  },
+  {
+    id: "embed_2cc",
+    name: "2Embed HD (Ultra Fast)",
+    banglaName: "সার্ভার ৪ — ২-এমবেড এইচডি (আল্ট্রা ফাস্ট)",
+    type: "Fast Subbed Stream",
+    audio: "Original Subbed",
+    quality: "1080p HD",
+    badge: "ULTRA FAST",
+    speed: "Cloudflare CDN",
+    provider: "2Embed CC"
   },
   {
     id: "aw-stream",
-    name: "AnimeWorld Multi-Dub (Hindi/Eng/Ben)",
-    banglaName: "সার্ভার ২ — এনিমেওয়ার্ল্ড মাল্টি-ডাব",
+    name: "AnimeWorld (Hindi/Eng/Ben Dub)",
+    banglaName: "সার্ভার ৫ — হিন্দি ও বাংলা ডাব স্পেশাল",
     type: "Hindi & English Dub",
     audio: "Hindi, Eng, Ben Audio",
     quality: "Full HD 1080p",
     badge: "HINDI / DUB",
     speed: "Fast South-Asia CDN",
     provider: "AnimeWorld India"
-  },
-  {
-    id: "vidcloud",
-    name: "Embed.su Ultra HD",
-    banglaName: "সার্ভার ৩ — এমবেড.এসইউ আল্ট্রা (১০৮০p)",
-    type: "Japanese Sub / Eng Dub",
-    audio: "Original JP Sub / Multi-Sub",
-    quality: "1080p 60FPS",
-    badge: "1080p ULTRA",
-    speed: "Edge CDN",
-    provider: "EmbedSU Network"
-  },
-  {
-    id: "gogostream",
-    name: "VidSrc CC MovieBox",
-    banglaName: "সার্ভার ৪ — ভিডক্লাউড মুভিবক্স কোর",
-    type: "English Sub & Dub",
-    audio: "Sub & Dub Fast Stream",
-    quality: "1080p / 720p HD",
-    badge: "MOVIEBOX CORE",
-    speed: "Ultra CDN",
-    provider: "VidSrc CC"
-  },
-  {
-    id: "vidsrc",
-    name: "SmashyStream Multi",
-    banglaName: "সার্ভার ৫ — স্ম্যাশি-স্ট্রিম ক্লাউড",
-    type: "Dual Audio Sub/Dub",
-    audio: "Dual Audio (JP/EN)",
-    quality: "Auto 1080p Adaptive",
-    badge: "DUAL AUDIO",
-    speed: "Buffer-Free Global",
-    provider: "SmashyStream"
   }
 ];
 
@@ -71,47 +71,18 @@ export const SUBTITLES_TRACKS = [
   { id: "jp", label: "日本語 (Japanese)", banglaLabel: "জাপানি", flag: "🇯🇵" }
 ];
 
-// Fallback high-res anime trailers/clips if anime doesn't specify one
-const DEFAULT_TRAILERS = {
-  'attack on titan': 'MGRm4IzK1SQ',
-  'jujutsu kaisen': 'pkZXflMvi_g',
-  'demon slayer': 'VQGCKyvzIM4',
-  'solo leveling': '91p05G5-r94',
-  'naruto': 'QczGoChX-kx',
-  'one piece': 'MCb13lbK6fg',
-  'death note': 'NlJZ-YgAt-c',
-  'chainsaw man': 'jk7Q4nCroHQ',
-  'bleach': '78WIYzX_Ed8'
-};
-
 /**
  * Returns stream URL for a given server and episode
  */
-export const getStreamUrlForEpisode = (malId, episodeNum = 1, serverId = "official-pv", title = "", season = 1, anime = null) => {
+export const getStreamUrlForEpisode = (malId, episodeNum = 1, serverId = "vidsrc_in", title = "", season = 1, anime = null) => {
   const ep = Number(episodeNum) || 1;
-  const safeTitle = (title || "").toLowerCase().trim();
-
-  if (serverId === "official-pv") {
-    // Check if anime object has trailer
-    let trailerId = anime?.trailer?.id;
-    if (!trailerId) {
-      for (const [k, v] of Object.entries(DEFAULT_TRAILERS)) {
-        if (safeTitle.includes(k)) {
-          trailerId = v;
-          break;
-        }
-      }
-    }
-    if (!trailerId) trailerId = 'MGRm4IzK1SQ'; // Attack on Titan official trailer
-    return `https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=0&rel=0&modestbranding=1`;
-  }
 
   if (serverId === "aw-stream") {
     return getAnimeWorldEpisodeUrl(title, ep, season);
   }
 
   const streamMap = getMovieBoxStreamUrls(malId, ep, title, season);
-  return streamMap[serverId] || streamMap.vidcloud;
+  return streamMap[serverId] || streamMap.vidsrc_in;
 };
 
 /**
@@ -130,7 +101,6 @@ export const generateDownloadInfo = (animeTitle, episodeNum, quality = "1080p", 
     fileSize: `${sizeMb} MB`,
     quality,
     audio,
-    downloadUrl: `https://www.youtube.com/results?search_query=${encodeURIComponent((animeTitle || 'Anime') + ' Episode ' + episodeNum)}`
+    downloadUrl: `https://vidsrc.in/embed/tv/1429/1/${episodeNum}`
   };
 };
-

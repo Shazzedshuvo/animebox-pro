@@ -1,4 +1,4 @@
-// src/services/streamingService.js - Real 24-Min Full Episode Anime Streaming System
+// src/services/streamingService.js - Real 24-Min Full Episode Anime & Movie Streaming System
 import { getMovieBoxStreamUrls } from '../api/consumetApi';
 
 /**
@@ -60,11 +60,11 @@ export const SUBTITLES_TRACKS = [
 ];
 
 /**
- * Returns stream URL for a given server and episode
+ * Returns stream URL for a given server, episode, and media format (Movie / TV)
  */
 export const getStreamUrlForEpisode = (malId, episodeNum = 1, serverId = "vidsrc_in", title = "", season = 1, anime = null) => {
   const ep = Number(episodeNum) || 1;
-  const streamMap = getMovieBoxStreamUrls(malId, ep, title, season);
+  const streamMap = getMovieBoxStreamUrls(malId, ep, title, season, anime);
   return streamMap[serverId] || streamMap.vidsrc_in;
 };
 
@@ -84,6 +84,6 @@ export const generateDownloadInfo = (animeTitle, episodeNum, quality = "1080p", 
     fileSize: `${sizeMb} MB`,
     quality,
     audio,
-    downloadUrl: `https://vidsrc.in/embed/tv/1429/1/${episodeNum}`
+    downloadUrl: `https://vidsrc.in/embed/movie/372058`
   };
 };

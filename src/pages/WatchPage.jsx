@@ -4,7 +4,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   ChevronLeft, ChevronRight, Share2, Download, Heart, 
   Check, Star, ShieldCheck, Film, AlertTriangle, Sparkles, ExternalLink,
-  Moon, Sun, Tv, Play
+  Moon, Sun, Tv, Play, Volume2, Globe, Zap
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useFavorites } from '../context/FavoritesContext';
@@ -12,6 +12,7 @@ import { useWatchHistory } from '../context/WatchHistoryContext';
 import { useToast } from '../context/ToastContext';
 import { useAnimeDetailsQuery } from '../hooks/useAnimeQuery';
 import { SERVERS } from '../services/streamingService';
+import { getDirectWatchUrls } from '../api/consumetApi';
 import { VideoPlayer } from '../components/player/VideoPlayer';
 import { ServerSwitcher } from '../components/player/ServerSwitcher';
 import { SubtitleSettings } from '../components/player/SubtitleSettings';
@@ -30,12 +31,27 @@ export const WatchPage = ({ onOpenDownload }) => {
   const { data: anime, isLoading } = useAnimeDetailsQuery(id);
 
   const [activeServer, setActiveServer] = useState("vidsrc_in");
+  const [selectedAudio, setSelectedAudio] = useState("sub"); // 'sub' | 'hindi' | 'dub' | 'ben'
   const [isServerLoading, setIsServerLoading] = useState(false);
   const [selectedSubtitle, setSelectedSubtitle] = useState("off");
   const [subtitleSize, setSubtitleSize] = useState("medium");
   const [subtitleBg, setSubtitleBg] = useState("rgba(0, 0, 0, 0.75)");
   const [isTheaterMode, setIsTheaterMode] = useState(false);
-  const [autoPlayNext, setAutoPlayNext] = useState(true);
+
+  // Audio Switcher Handler
+  const handleAudioChange = (audioKey) => {
+    setSelectedAudio(audioKey);
+    if (audioKey === 'hindi' || audioKey === 'ben') {
+      setActiveServer('aw-stream');
+      showInfo(lang === 'bn' ? 'হিন্দি ও বাংলা ডাব স্ট্রিমে সুইচ করা হয়েছে' : 'Switched to Hindi & Bengali Dub Stream');
+    } else if (audioKey === 'dub') {
+      setActiveServer('vidsrc_to');
+      showInfo(lang === 'bn' ? 'ইংলিশ ডাব স্ট্রিমে সুইচ করা হয়েছে' : 'Switched to English Dub Stream');
+    } else {
+      setActiveServer('vidsrc_in');
+      showInfo(lang === 'bn' ? 'অরিজিনাল জাপানি সাব স্ট্রিমে সুইচ করা হয়েছে' : 'Switched to Japanese Sub Stream');
+    }
+  };
 
   // Handle server switching
   const handleServerChange = (serverId) => {
@@ -59,6 +75,10 @@ export const WatchPage = ({ onOpenDownload }) => {
     banglaTitle: `এপিসোড ${episodeNumber}`
   };
 
+  const directWatchLinks = useMemo(() => {
+    return getDirectWatchUrls(anime?.title || 'Anime', episodeNumber, anime?.id || 20);
+  }, [anime, episodeNumber]);
+
   const hasPrev = episodeNumber > 1;
   const hasNext = episodeNumber < totalEpisodes;
 
@@ -77,7 +97,6 @@ export const WatchPage = ({ onOpenDownload }) => {
   // Keyboard Shortcuts (T: Theater, N: Next, P: Prev)
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Ignore when typing inside inputs
       if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
 
       if (e.key === 't' || e.key === 'T') {
@@ -188,13 +207,56 @@ export const WatchPage = ({ onOpenDownload }) => {
         {/* Left Column: Player + Controls + Details */}
         <div className="watch-player-column">
           
-          {/* Video Player Box */}
+          {/* Audio Language Switcher Bar on Top of Player */}
+          <div className="audio-language-bar glass-panel">
+            <div className="audio-bar-label">
+              <Volume2 size={16} className="text-crimson" />
+              <span>{lang === 'bn' ? 'অডিও ভাষা:' : 'Audio Language:'}</span>
+            </div>
+
+            <div className="audio-pills-row">
+              <button 
+                className={`audio-pill ${selectedAudio === 'sub' ? 'active' : ''}`}
+                onClick={() => handleAudioChange('sub')}
+              >
+                <span className="pill-flag">🇯🇵</span>
+                <span>{lang === 'bn' ? 'জাপানি সাব' : 'Japanese Sub'}</span>
+              </button>
+
+              <button 
+                className={`audio-pill ${selectedAudio === 'hindi' ? 'active' : ''}`}
+                onClick={() => handleAudioChange('hindi')}
+              >
+                <span className="pill-flag">🇮🇳</span>
+                <span>{lang === 'bn' ? 'হিন্দি ডাব (Hindi Dub)' : 'Hindi Dub'}</span>
+              </button>
+
+              <button 
+                className={`audio-pill ${selectedAudio === 'dub' ? 'active' : ''}`}
+                onClick={() => handleAudioChange('dub')}
+              >
+                <span className="pill-flag">🇺🇸</span>
+                <span>{lang === 'bn' ? 'ইংলিশ ডাব' : 'English Dub'}</span>
+              </button>
+
+              <button 
+                className={`audio-pill ${selectedAudio === 'ben' ? 'active' : ''}`}
+                onClick={() => handleAudioChange('ben')}
+              >
+                <span className="pill-flag">🇧🇩</span>
+                <span>{lang === 'bn' ? 'বাংলা ডাব' : 'Bengali Dub'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Full Size 16:9 Cinema Video Player Box */}
           <div className="player-aspect-box">
             <VideoPlayer
-              key={`${anime.id}_${episodeNumber}_${activeServer}`}
+              key={`${anime.id}_${episodeNumber}_${activeServer}_${selectedAudio}`}
               anime={anime}
               episodeNumber={episodeNumber}
               activeServer={activeServer}
+              selectedAudio={selectedAudio}
               isServerLoading={isServerLoading}
               isTheaterMode={isTheaterMode}
               onToggleTheater={() => setIsTheaterMode(prev => !prev)}
@@ -237,30 +299,28 @@ export const WatchPage = ({ onOpenDownload }) => {
             </div>
           </div>
 
-          {/* Official Streaming Badges Row */}
-          {officialStreams.length > 0 && (
-            <div className="official-partners-strip glass-panel">
-              <div className="partners-strip-title">
-                <ShieldCheck size={16} className="text-emerald-400" />
-                <span>{lang === 'bn' ? 'অফিসিয়াল স্ট্রিমিং ও পার্টনার লিংক:' : 'Official Anime Partners & Hub:'}</span>
-              </div>
-              <div className="partners-chips-wrap">
-                {officialStreams.map((st, idx) => (
-                  <a
-                    key={idx}
-                    href={st.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="partner-chip"
-                    style={{ '--chip-accent': st.color || '#e50914' }}
-                  >
-                    <span>{st.name}</span>
-                    <ExternalLink size={13} />
-                  </a>
-                ))}
-              </div>
+          {/* Direct Streaming & Dub Hub Strip */}
+          <div className="player-direct-links-strip glass-panel">
+            <div className="direct-links-title">
+              <Zap size={15} className="text-gold" />
+              <span>{lang === 'bn' ? 'ফুল এপিসোড স্ট্রিমিং ও ডাব হাব:' : 'Full Episode Streaming Hub:'}</span>
             </div>
-          )}
+            <div className="direct-links-group">
+              {directWatchLinks.map((link, idx) => (
+                <a
+                  key={idx}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="direct-hub-chip"
+                  style={{ '--chip-color': link.color }}
+                >
+                  <span>{link.name}</span>
+                  <ExternalLink size={12} />
+                </a>
+              ))}
+            </div>
+          </div>
 
           {/* Server & Subtitle Tuners Grid */}
           <div className="watch-tuners-grid">

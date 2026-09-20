@@ -2,16 +2,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Maximize, Minimize, RotateCcw, Zap, ExternalLink, 
-  ShieldCheck, Loader2, Sparkles, Moon, Sun, AlertTriangle, Play, RefreshCw
+  ShieldCheck, Loader2, Sparkles, Moon, Sun, AlertTriangle, Play, RefreshCw, Film
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { getStreamUrlForEpisode, SERVERS } from '../../services/streamingService';
 import { getDirectWatchUrls } from '../../api/consumetApi';
+import { getAnimeWorldEpisodeUrl } from '../../services/animeWorldService';
 
 export const VideoPlayer = ({
   anime,
   episodeNumber = 1,
-  activeServer = 'vidcloud',
+  activeServer = 'official-pv',
   isServerLoading = false,
   isTheaterMode = false,
   onToggleTheater,
@@ -37,8 +38,8 @@ export const VideoPlayer = ({
 
   // Get active stream URL
   const streamEmbedUrl = useMemo(() => {
-    return getStreamUrlForEpisode(malId, epNum, activeServer, animeTitle);
-  }, [malId, epNum, activeServer, animeTitle, reloadKey]);
+    return getStreamUrlForEpisode(malId, epNum, activeServer, animeTitle, 1, anime);
+  }, [malId, epNum, activeServer, animeTitle, anime, reloadKey]);
 
   // Current Server metadata
   const currentServerObj = useMemo(() => {
@@ -61,7 +62,7 @@ export const VideoPlayer = ({
     setIsIframeLoading(true);
     const timer = setTimeout(() => {
       setIsIframeLoading(false);
-    }, 800);
+    }, 600);
     return () => clearTimeout(timer);
   }, [streamEmbedUrl, epNum, activeServer]);
 
@@ -108,7 +109,7 @@ export const VideoPlayer = ({
               <div className="player-loader-text-group">
                 <span className="player-loading-text">
                   {lang === 'bn' 
-                    ? `এপিসোড ${epNum} স্ট্রিম লোড হচ্ছে...` 
+                    ? `এপিসোড ${epNum} লোড হচ্ছে...` 
                     : `Loading Episode ${epNum} Stream...`}
                 </span>
                 <span className="player-server-subtext">
@@ -141,6 +142,19 @@ export const VideoPlayer = ({
           </div>
 
           <div className="player-top-actions-group">
+            {/* Direct Full Episode Stream Action Button */}
+            <a
+              href={getAnimeWorldEpisodeUrl(animeTitle, epNum)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mode-btn anime-world-link-btn"
+              title="Watch Full Episode on AnimeWorld (Hindi/English/Bengali Dub)"
+            >
+              <Zap size={13} className="text-gold" />
+              <span>{lang === 'bn' ? 'ফুল এপিসোড দেখুন' : 'Watch Full Ep'}</span>
+              <ExternalLink size={12} />
+            </a>
+
             {/* Reload Server */}
             <button 
               className="ctrl-btn-top"
@@ -182,7 +196,7 @@ export const VideoPlayer = ({
       <div className="player-direct-links-strip glass-panel">
         <div className="direct-links-title">
           <Zap size={14} className="text-gold" />
-          <span>{lang === 'bn' ? 'সরাসরি স্ট্রিমিং ও ডাবড হাব:' : 'Direct Streaming & Dub Hub:'}</span>
+          <span>{lang === 'bn' ? 'সরাসরি ফুল এপিসোড স্ট্রিমিং ও ডাব হাব:' : 'Full Episode Streaming Hub:'}</span>
         </div>
         <div className="direct-links-group">
           {directWatchLinks.map((link, idx) => (

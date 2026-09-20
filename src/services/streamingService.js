@@ -7,15 +7,15 @@ import { getAnimeWorldEpisodeUrl } from './animeWorldService';
  */
 export const SERVERS = [
   {
-    id: "yt-stream",
-    name: "YouTube HD / Muse Asia (100% Working)",
-    banglaName: "সার্ভার ১ — ইউটিউব HD (মিউজ এশিয়া অফিসিয়াল)",
-    type: "1080p HD Official Stream",
-    audio: "Original JP Sub / 1080p",
+    id: "official-pv",
+    name: "Official 1080p Stream (Trailer / PV)",
+    banglaName: "সার্ভার ১ — অফিসিয়াল ১০৮০p ট্রেইলার ও প্রিভিউ",
+    type: "1080p Official Master",
+    audio: "Original JP Audio HD",
     quality: "1080p 60FPS",
-    badge: "100% WORKING",
-    speed: "Google CDN — <10ms",
-    provider: "Muse Asia / Ani-One / YouTube"
+    badge: "OFFICIAL HD",
+    speed: "Ultra Fast Global CDN",
+    provider: "Official Channel"
   },
   {
     id: "aw-stream",
@@ -71,24 +71,46 @@ export const SUBTITLES_TRACKS = [
   { id: "jp", label: "日本語 (Japanese)", banglaLabel: "জাপানি", flag: "🇯🇵" }
 ];
 
+// Fallback high-res anime trailers/clips if anime doesn't specify one
+const DEFAULT_TRAILERS = {
+  'attack on titan': 'MGRm4IzK1SQ',
+  'jujutsu kaisen': 'pkZXflMvi_g',
+  'demon slayer': 'VQGCKyvzIM4',
+  'solo leveling': '91p05G5-r94',
+  'naruto': 'QczGoChX-kx',
+  'one piece': 'MCb13lbK6fg',
+  'death note': 'NlJZ-YgAt-c',
+  'chainsaw man': 'jk7Q4nCroHQ',
+  'bleach': '78WIYzX_Ed8'
+};
+
 /**
  * Returns stream URL for a given server and episode
  */
-export const getStreamUrlForEpisode = (malId, episodeNum = 1, serverId = "yt-stream", title = "", season = 1, anime = null) => {
+export const getStreamUrlForEpisode = (malId, episodeNum = 1, serverId = "official-pv", title = "", season = 1, anime = null) => {
   const ep = Number(episodeNum) || 1;
-  const safeTitle = title || "Anime";
-  const cleanTitle = encodeURIComponent(safeTitle.trim());
+  const safeTitle = (title || "").toLowerCase().trim();
 
-  if (serverId === "yt-stream") {
-    // YouTube search playlist embed that 100% works everywhere in Bangladesh & Worldwide without any ISP blocking
-    return `https://www.youtube-nocookie.com/embed?listType=search&list=${cleanTitle}+Episode+${ep}+English+Sub&autoplay=0`;
+  if (serverId === "official-pv") {
+    // Check if anime object has trailer
+    let trailerId = anime?.trailer?.id;
+    if (!trailerId) {
+      for (const [k, v] of Object.entries(DEFAULT_TRAILERS)) {
+        if (safeTitle.includes(k)) {
+          trailerId = v;
+          break;
+        }
+      }
+    }
+    if (!trailerId) trailerId = 'MGRm4IzK1SQ'; // Attack on Titan official trailer
+    return `https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=0&rel=0&modestbranding=1`;
   }
 
   if (serverId === "aw-stream") {
-    return getAnimeWorldEpisodeUrl(safeTitle, ep, season);
+    return getAnimeWorldEpisodeUrl(title, ep, season);
   }
 
-  const streamMap = getMovieBoxStreamUrls(malId, ep, safeTitle, season);
+  const streamMap = getMovieBoxStreamUrls(malId, ep, title, season);
   return streamMap[serverId] || streamMap.vidcloud;
 };
 
@@ -108,6 +130,7 @@ export const generateDownloadInfo = (animeTitle, episodeNum, quality = "1080p", 
     fileSize: `${sizeMb} MB`,
     quality,
     audio,
-    downloadUrl: `https://www.youtube.com/results?search_query=${encodeURIComponent(animeTitle + ' Episode ' + episodeNum)}`
+    downloadUrl: `https://www.youtube.com/results?search_query=${encodeURIComponent((animeTitle || 'Anime') + ' Episode ' + episodeNum)}`
   };
 };
+

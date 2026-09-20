@@ -29,7 +29,7 @@ export const WatchPage = ({ onOpenDownload }) => {
   const episodeNumber = parseInt(episode, 10) || 1;
   const { data: anime, isLoading } = useAnimeDetailsQuery(id);
 
-  const [activeServer, setActiveServer] = useState("yt-stream");
+  const [activeServer, setActiveServer] = useState("official-pv");
   const [isServerLoading, setIsServerLoading] = useState(false);
   const [selectedSubtitle, setSelectedSubtitle] = useState("off");
   const [subtitleSize, setSubtitleSize] = useState("medium");

@@ -1,19 +1,17 @@
-// src/components/player/VideoPlayer.jsx - Ultimate Cinema Video Player Engine
+// src/components/player/VideoPlayer.jsx - Pure In-App Cinema Video Player (No External Redirects)
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Maximize, Minimize, RotateCcw, Zap, ExternalLink, 
-  ShieldCheck, Loader2, Sparkles, Moon, Sun, AlertTriangle, Play, RefreshCw, Volume2, Globe
+  Maximize, Minimize, RotateCcw, Zap,
+  ShieldCheck, Loader2, Sparkles, Moon, Sun, Play, RefreshCw, Volume2, Globe
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { getStreamUrlForEpisode, SERVERS } from '../../services/streamingService';
-import { getDirectWatchUrls } from '../../api/consumetApi';
-import { getAnimeWorldEpisodeUrl } from '../../services/animeWorldService';
 
 export const VideoPlayer = ({
   anime,
   episodeNumber = 1,
   activeServer = 'vidsrc_in',
-  selectedAudio = 'sub', // 'sub' | 'hindi' | 'dub' | 'ben'
+  selectedAudio = 'sub', // 'sub' | 'dub' | 'hindi'
   onAudioChange,
   isServerLoading = false,
   isTheaterMode = false,
@@ -38,13 +36,13 @@ export const VideoPlayer = ({
     title: `Episode ${epNum}`
   };
 
-  // Determine server based on selected audio if user clicks audio pill
+  // Determine effective server based on audio choice
   const effectiveServer = useMemo(() => {
-    if (selectedAudio === 'hindi' || selectedAudio === 'ben') {
-      return 'aw-stream'; // AnimeWorld Hindi & Bengali Dub
-    }
     if (selectedAudio === 'dub') {
-      return 'vidsrc_to'; // VidSrc Dual Audio / English Dub
+      return 'vidsrc_to'; // English Dub / Dual Audio core
+    }
+    if (selectedAudio === 'hindi') {
+      return 'vidsrc_me'; // Multi-Audio / Hindi fallback
     }
     return activeServer;
   }, [selectedAudio, activeServer]);
@@ -58,11 +56,6 @@ export const VideoPlayer = ({
   const currentServerObj = useMemo(() => {
     return SERVERS.find(s => s.id === effectiveServer) || SERVERS[0];
   }, [effectiveServer]);
-
-  // Direct watch links for 1-click fallback
-  const directWatchLinks = useMemo(() => {
-    return getDirectWatchUrls(animeTitle, epNum, malId);
-  }, [animeTitle, epNum, malId]);
 
   // Handle server reload
   const handleReloadServer = () => {
@@ -125,7 +118,7 @@ export const VideoPlayer = ({
                   : `Loading Episode ${epNum} Stream...`}
               </span>
               <span className="player-server-subtext">
-                {lang === 'bn' ? currentServerObj.banglaName : currentServerObj.name}
+                {selectedAudio === 'dub' ? 'English Dubbed Stream' : (selectedAudio === 'hindi' ? 'Hindi Dub Stream' : 'Japanese Subbed Stream')} • {currentServerObj.quality}
               </span>
             </div>
           </div>
@@ -135,7 +128,7 @@ export const VideoPlayer = ({
       {/* Main Dynamic Real Episode Video Embed */}
       <div className="official-video-wrapper">
         <iframe
-          key={`${effectiveServer}_${animeId}_${epNum}_${reloadKey}`}
+          key={`${effectiveServer}_${animeId}_${epNum}_${selectedAudio}_${reloadKey}`}
           src={streamEmbedUrl}
           title={`${animeTitle} - Episode ${epNum}`}
           className="video-element-iframe"
@@ -145,28 +138,15 @@ export const VideoPlayer = ({
         />
       </div>
 
-      {/* Floating Cinema Header Bar */}
+      {/* Floating Cinema Header Bar (Inside Player Only - Zero External Links) */}
       <div className="player-top-floating-bar">
         <div className="player-top-meta-badge">
           <span className="ep-live-pill">EP {epNum}</span>
-          <span className="server-live-pill">{currentServerObj.badge}</span>
+          <span className="server-live-pill">{selectedAudio === 'dub' ? 'ENG DUB' : (selectedAudio === 'hindi' ? 'HINDI DUB' : 'JP SUB')}</span>
           <span className="ep-live-title">{currentEpData.title}</span>
         </div>
 
         <div className="player-top-actions-group">
-          {/* Direct Hindi Dub Watch Button */}
-          <a
-            href={getAnimeWorldEpisodeUrl(animeTitle, epNum)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mode-btn anime-world-link-btn"
-            title="Watch Hindi & Bengali Dubbed on AnimeWorld"
-          >
-            <Volume2 size={13} className="text-gold" />
-            <span>{lang === 'bn' ? 'হিন্দি ডাব দেখুন' : 'Hindi Dub'}</span>
-            <ExternalLink size={12} />
-          </a>
-
           {/* Reload Server */}
           <button 
             className="ctrl-btn-top"

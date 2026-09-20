@@ -1,65 +1,53 @@
 // src/services/streamingService.js - Real 24-Min Full Episode Anime Streaming System
 import { getMovieBoxStreamUrls } from '../api/consumetApi';
-import { getAnimeWorldEpisodeUrl } from './animeWorldService';
 
 /**
- * 5 Active High-Speed Streaming Servers for 24-Min Full Anime Episodes
+ * 4 In-App High-Speed Streaming Servers (No External Redirects)
  */
 export const SERVERS = [
   {
     id: "vidsrc_in",
-    name: "VidSrc Pro (24-Min Full Episode)",
-    banglaName: "সার্ভার ১ — ভিডসোর্স প্রো (২৪ মিনিট ফুল এপিসোড)",
-    type: "Full Episode 1080p",
-    audio: "Original JP Sub / Multi-Sub",
+    name: "Server 1 — VidSrc Master (Sub & Dub)",
+    banglaName: "সার্ভার ১ — মাস্টার সিডিএন (সাব ও ডাব)",
+    type: "1080p Ultra HD",
+    audio: "Original JP Sub / Dual Audio",
     quality: "1080p 60FPS",
-    badge: "FULL EPISODE",
+    badge: "1080p HD",
     speed: "Master CDN — Instant",
-    provider: "VidSrc IN Core"
+    provider: "VidSrc Core"
   },
   {
     id: "vidsrc_to",
-    name: "VidSrc TO (MovieBox Dual Audio)",
-    banglaName: "সার্ভার ২ — মুভিবক্স ডুয়াল অডিও",
-    type: "Dual Audio (JP/EN)",
-    audio: "Dual Audio Sub/Dub",
+    name: "Server 2 — English Dubbed Cinema",
+    banglaName: "সার্ভার ২ — ইংলিশ ডাব স্পেশাল (English Dub)",
+    type: "English Dubbed HD",
+    audio: "English Audio Track",
     quality: "Full HD 1080p",
-    badge: "DUAL AUDIO",
+    badge: "ENGLISH DUB",
     speed: "Fast CDN",
     provider: "VidSrc TO Engine"
   },
   {
     id: "vidsrc_me",
-    name: "VidSrc ME (Buffer-Free)",
-    banglaName: "সার্ভার ৩ — ভিডসোর্স মি (বাফার-ফ্রি)",
-    type: "1080p HD Stream",
-    audio: "Sub & Dub Fast Stream",
+    name: "Server 3 — Multi-Audio / Hindi Stream",
+    banglaName: "সার্ভার ৩ — মাল্টি-অডিও ও হিন্দি স্ট্রিম",
+    type: "Multi-Audio 1080p",
+    audio: "Multi-Audio (Hindi/Eng/JP)",
     quality: "1080p / 720p HD",
-    badge: "NO BUFFER",
+    badge: "MULTI-AUDIO",
     speed: "Global Edge CDN",
     provider: "VidSrc ME"
   },
   {
     id: "embed_2cc",
-    name: "2Embed HD (Ultra Fast)",
-    banglaName: "সার্ভার ৪ — ২-এমবেড এইচডি (আল্ট্রা ফাস্ট)",
-    type: "Fast Subbed Stream",
+    name: "Server 4 — 2Embed Cloud VIP",
+    banglaName: "সার্ভার ৪ — ২-এমবেড ক্লাউড ভিআইপি",
+    type: "Ultra Fast Stream",
     audio: "Original Subbed",
     quality: "1080p HD",
-    badge: "ULTRA FAST",
+    badge: "VIP FAST",
     speed: "Cloudflare CDN",
     provider: "2Embed CC"
-  },
-  {
-    id: "aw-stream",
-    name: "AnimeWorld (Hindi/Eng/Ben Dub)",
-    banglaName: "সার্ভার ৫ — হিন্দি ও বাংলা ডাব স্পেশাল",
-    type: "Hindi & English Dub",
-    audio: "Hindi, Eng, Ben Audio",
-    quality: "Full HD 1080p",
-    badge: "HINDI / DUB",
-    speed: "Fast South-Asia CDN",
-    provider: "AnimeWorld India"
   }
 ];
 
@@ -76,11 +64,6 @@ export const SUBTITLES_TRACKS = [
  */
 export const getStreamUrlForEpisode = (malId, episodeNum = 1, serverId = "vidsrc_in", title = "", season = 1, anime = null) => {
   const ep = Number(episodeNum) || 1;
-
-  if (serverId === "aw-stream") {
-    return getAnimeWorldEpisodeUrl(title, ep, season);
-  }
-
   const streamMap = getMovieBoxStreamUrls(malId, ep, title, season);
   return streamMap[serverId] || streamMap.vidsrc_in;
 };

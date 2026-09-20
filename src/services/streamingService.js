@@ -18,14 +18,14 @@ export const SERVERS = [
   },
   {
     id: "gogostream",
-    name: "GogoStream Pro",
-    banglaName: "সার্ভার ২ — গোগো-স্ট্রিম প্রো (ফাস্ট সাব)",
+    name: "SmashyStream Pro",
+    banglaName: "সার্ভার ২ — স্ম্যাশি-স্ট্রিম প্রো (ফাস্ট সাব)",
     type: "English Sub & Dub",
     audio: "Sub & Dub Fast Stream",
     quality: "1080p / 720p HD",
     badge: "FAST SUB/DUB",
     speed: "Ultra CDN — <30ms",
-    provider: "GogoAnime Core"
+    provider: "SmashyStream Core"
   },
   {
     id: "vidsrc",
@@ -51,14 +51,14 @@ export const SERVERS = [
   },
   {
     id: "multidub",
-    name: "AnimeWorld Multi-Dub",
-    banglaName: "সার্ভার ৫ — হিন্দি ও বাংলা ডাব স্পেশাল",
-    type: "Hindi / English / Bengali Dub",
-    audio: "Hindi, Eng, Ben Audio",
+    name: "MultiEmbed Fast",
+    banglaName: "সার্ভার ৫ — মাল্টি-এমবেড সিডিএন",
+    type: "Hindi / English Dub",
+    audio: "Hindi, Eng Audio",
     quality: "1080p HD Dub",
-    badge: "HINDI / DUB",
+    badge: "MULTI-AUDIO",
     speed: "South-Asia CDN",
-    provider: "AnimeWorld MultiCloud"
+    provider: "MultiEmbed Network"
   }
 ];
 
@@ -73,8 +73,8 @@ export const SUBTITLES_TRACKS = [
 /**
  * Returns stream URL for a given server and episode
  */
-export const getStreamUrlForEpisode = (malId, episodeNum = 1, serverId = "vidcloud", title = "") => {
-  const streamMap = getMovieBoxStreamUrls(malId, episodeNum, title);
+export const getStreamUrlForEpisode = (malId, episodeNum = 1, serverId = "vidcloud", title = "", season = 1) => {
+  const streamMap = getMovieBoxStreamUrls(malId, episodeNum, title, season);
   return streamMap[serverId] || streamMap.vidcloud;
 };
 
@@ -94,6 +94,6 @@ export const generateDownloadInfo = (animeTitle, episodeNum, quality = "1080p", 
     fileSize: `${sizeMb} MB`,
     quality,
     audio,
-    downloadUrl: `https://vidsrc.cc/v2/embed/anime/${safeTitle}/${episodeNum}`
+    downloadUrl: `https://vidsrc.cc/v2/embed/tv/95479/1/${episodeNum}`
   };
 };

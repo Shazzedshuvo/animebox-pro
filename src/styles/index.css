@@ -1238,11 +1238,54 @@ input, select, textarea {
 
 .row-card-item {
   flex: 0 0 200px;
+  width: 200px;
+  min-width: 200px;
+  max-width: 200px;
+  flex-shrink: 0;
 }
 
 @media (max-width: 640px) {
   .row-card-item {
     flex: 0 0 150px;
+    width: 150px;
+    min-width: 150px;
+    max-width: 150px;
+  }
+}
+
+/* Master Anime Grid (Movies, Series, Dubbed, Search, Browse Pages) */
+.anime-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 24px 18px;
+  width: 100%;
+  padding: 10px 0 30px;
+}
+
+@media (min-width: 1500px) {
+  .anime-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 26px 20px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .anime-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .anime-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px 14px;
+  }
+}
+
+@media (max-width: 600px) {
+  .anime-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 12px;
   }
 }
 
@@ -1277,14 +1320,24 @@ input, select, textarea {
   .row-nav-btn { display: none; }
 }
 
-/* Anime Card Component */
+/* Anime Card Component - Standardized 2:3 Ratio */
 .anime-card-root {
   position: relative;
+  width: 100%;
+  height: 100%;
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
   transition: transform var(--transition-smooth), border-color var(--transition-smooth), box-shadow var(--transition-smooth);
+}
+
+.anime-card-root:hover {
+  transform: translateY(-6px);
+  border-color: var(--accent-color);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.7), 0 0 20px var(--accent-glow);
 }
 
 .card-spotlight-glow {
@@ -1299,21 +1352,27 @@ input, select, textarea {
 }
 
 .card-link-wrap {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
 }
 
 .card-poster-wrap {
   position: relative;
-  aspect-ratio: 2 / 3;
   width: 100%;
+  aspect-ratio: 2 / 3;
   overflow: hidden;
   background: #15151c;
+  flex-shrink: 0;
 }
 
 .card-poster-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
+  display: block;
   transition: transform var(--transition-smooth);
 }
 

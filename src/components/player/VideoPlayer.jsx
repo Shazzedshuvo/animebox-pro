@@ -38,9 +38,6 @@ export const VideoPlayer = ({
 
   // Determine effective server based on audio choice
   const effectiveServer = useMemo(() => {
-    if (selectedAudio === 'dub') {
-      return 'vidsrc_to'; // English Dub / Dual Audio core
-    }
     if (selectedAudio === 'hindi') {
       return 'vidsrc_me'; // Multi-Audio / Hindi fallback
     }
